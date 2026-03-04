@@ -17,21 +17,25 @@
   the iteration process.
 -->
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: Java 17 (MUST for backend work)  
+**Primary Dependencies**: Spring Boot 3.x, Spring Security, Spring Data JPA, springdoc-openapi  
+**Storage**: PostgreSQL (MUST)  
+**Testing**: JUnit 5, Spring Boot Test, integration tests with PostgreSQL  
+**Target Platform**: Linux container runtime via Docker
+**Project Type**: backend web-service  
+**Performance Goals**: [NEEDS CLARIFICATION: feature-specific SLOs]  
+**Constraints**: HTTP Basic Auth required; Swagger/OpenAPI required; Dockerized execution required  
+**Scale/Scope**: [NEEDS CLARIFICATION: expected traffic and data volume]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- Runtime gate: design MUST target Spring Boot 3.x on Java 17.
+- Security gate: protected endpoints MUST require HTTP Basic Auth.
+- Data gate: persistence MUST use PostgreSQL and include migration impact analysis.
+- Delivery gate: local execution MUST be reproducible with Docker/Docker Compose.
+- API contract gate: endpoint changes MUST include Swagger/OpenAPI updates.
 
 ## Project Structure
 
