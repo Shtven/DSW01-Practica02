@@ -42,7 +42,7 @@
 
 ## 5) API contract and pagination pattern
 
-- Decision: OpenAPI 3.0 con endpoints REST `/api/empleados` y paginación obligatoria por `page` y `size`.
+- Decision: OpenAPI 3.0 con endpoints REST versionados `/api/v1/empleados` y paginación obligatoria por `page` y `size`.
 - Rationale: Evita ambigüedad de consumo, previene respuestas no acotadas y mantiene compatibilidad con decisiones de clarificación.
 - Alternatives considered:
   - Paginación opcional: comportamiento menos predecible.

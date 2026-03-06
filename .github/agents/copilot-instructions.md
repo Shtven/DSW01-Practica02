@@ -19,6 +19,11 @@ tests/
 
 # Add commands for Java 17 (MUST for backend work)
 
+## API Versioning
+
+- Public Spring Boot endpoints SHOULD follow `/api/v1/...` as default convention.
+- Breaking changes SHOULD introduce a new major API version path.
+
 ## Code Style
 
 Java 17 (MUST for backend work): Follow standard conventions

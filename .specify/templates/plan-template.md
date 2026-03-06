@@ -23,6 +23,7 @@
 **Testing**: JUnit 5, Spring Boot Test, integration tests with PostgreSQL  
 **Target Platform**: Linux container runtime via Docker
 **Project Type**: backend web-service  
+**API Versioning Strategy**: [NEEDS CLARIFICATION: endpoint versioning approach, e.g., /api/v1]  
 **Performance Goals**: [NEEDS CLARIFICATION: feature-specific SLOs]  
 **Constraints**: HTTP Basic Auth required; Swagger/OpenAPI required; Dockerized execution required  
 **Scale/Scope**: [NEEDS CLARIFICATION: expected traffic and data volume]
@@ -36,6 +37,7 @@
 - Data gate: persistence MUST use PostgreSQL and include migration impact analysis.
 - Delivery gate: local execution MUST be reproducible with Docker/Docker Compose.
 - API contract gate: endpoint changes MUST include Swagger/OpenAPI updates.
+- API versioning gate: endpoints públicos MUST definir versión explícita o estrategia equivalente documentada.
 
 ## Project Structure
 

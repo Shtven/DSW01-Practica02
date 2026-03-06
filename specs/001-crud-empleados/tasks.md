@@ -47,13 +47,13 @@
 
 **Goal**: Permitir alta de empleado con `clave` mixta autogenerada (`E` + secuencia) y validaciones obligatorias
 
-**Independent Test**: Enviar `POST /api/empleados` con credenciales Basic Auth válidas y payload válido; verificar respuesta `201` con `clave` generada en formato `E` + dígitos. Enviar payload inválido y verificar `400`.
+**Independent Test**: Enviar `POST /api/v1/empleados` con credenciales Basic Auth válidas y payload válido; verificar respuesta `201` con `clave` generada en formato `E` + dígitos. Enviar payload inválido y verificar `400`.
 
 ### Implementation for User Story 1
 
 - [X] T013 [US1] Implementar validaciones Bean Validation (not blank + max 100) en src/main/java/com/example/empleados/api/dto/CreateEmpleadoRequest.java
 - [X] T014 [US1] Implementar lógica de creación (sin permitir `clave` en request) en src/main/java/com/example/empleados/service/EmpleadoService.java
-- [X] T015 [US1] Implementar endpoint `POST /api/empleados` en src/main/java/com/example/empleados/api/EmpleadoController.java
+- [X] T015 [US1] Implementar endpoint `POST /api/v1/empleados` en src/main/java/com/example/empleados/api/EmpleadoController.java
 - [X] T016 [US1] Documentar operación de creación y respuestas (`201/400/401`) con anotaciones Swagger en src/main/java/com/example/empleados/api/EmpleadoController.java
 
 **Checkpoint**: User Story 1 funcional e independiente (MVP)
@@ -64,14 +64,14 @@
 
 **Goal**: Consultar empleado por clave y listar empleados con paginación obligatoria
 
-**Independent Test**: Consultar `GET /api/empleados/{clave}` existente/no existente (`200/404`) y `GET /api/empleados?page=0&size=10` (`200`); validar que sin `page` o `size` retorne `400`.
+**Independent Test**: Consultar `GET /api/v1/empleados/{clave}` existente/no existente (`200/404`) y `GET /api/v1/empleados?page=0&size=10` (`200`); validar que sin `page` o `size` retorne `400`.
 
 ### Implementation for User Story 2
 
 - [X] T017 [US2] Implementar servicio de consulta por `clave` con manejo de no encontrado en src/main/java/com/example/empleados/service/EmpleadoService.java
-- [X] T018 [US2] Implementar endpoint `GET /api/empleados/{clave}` en src/main/java/com/example/empleados/api/EmpleadoController.java
+- [X] T018 [US2] Implementar endpoint `GET /api/v1/empleados/{clave}` en src/main/java/com/example/empleados/api/EmpleadoController.java
 - [X] T019 [US2] Implementar servicio de listado paginado (`Pageable`) en src/main/java/com/example/empleados/service/EmpleadoService.java
-- [X] T020 [US2] Implementar endpoint `GET /api/empleados` con `page` y `size` obligatorios en src/main/java/com/example/empleados/api/EmpleadoController.java
+- [X] T020 [US2] Implementar endpoint `GET /api/v1/empleados` con `page` y `size` obligatorios en src/main/java/com/example/empleados/api/EmpleadoController.java
 - [X] T021 [US2] Implementar validación de patrón de identificador `^E[0-9]+$` para operaciones por `clave` en src/main/java/com/example/empleados/api/EmpleadoController.java
 - [X] T022 [US2] Documentar operaciones de consulta y paginación (`200/400/401/404`) con Swagger en src/main/java/com/example/empleados/api/EmpleadoController.java
 
@@ -83,14 +83,14 @@
 
 **Goal**: Actualizar datos editables y eliminar empleados de forma física
 
-**Independent Test**: Ejecutar `PUT /api/empleados/{clave}` válido (`200`) y luego `DELETE /api/empleados/{clave}` (`204`); confirmar que una consulta posterior retorna `404`.
+**Independent Test**: Ejecutar `PUT /api/v1/empleados/{clave}` válido (`200`) y luego `DELETE /api/v1/empleados/{clave}` (`204`); confirmar que una consulta posterior retorna `404`.
 
 ### Implementation for User Story 3
 
 - [X] T023 [US3] Implementar validaciones Bean Validation (not blank + max 100) para actualización en src/main/java/com/example/empleados/api/dto/UpdateEmpleadoRequest.java
 - [X] T024 [US3] Implementar lógica de actualización sin modificar `clave` en src/main/java/com/example/empleados/service/EmpleadoService.java
 - [X] T025 [US3] Implementar lógica de eliminación física por `clave` en src/main/java/com/example/empleados/service/EmpleadoService.java
-- [X] T026 [US3] Implementar endpoints `PUT /api/empleados/{clave}` y `DELETE /api/empleados/{clave}` en src/main/java/com/example/empleados/api/EmpleadoController.java
+- [X] T026 [US3] Implementar endpoints `PUT /api/v1/empleados/{clave}` y `DELETE /api/v1/empleados/{clave}` en src/main/java/com/example/empleados/api/EmpleadoController.java
 - [X] T027 [US3] Documentar operaciones de actualización/eliminación (`200/204/400/401/404`) con Swagger en src/main/java/com/example/empleados/api/EmpleadoController.java
 
 **Checkpoint**: Todas las historias funcionales e independientes

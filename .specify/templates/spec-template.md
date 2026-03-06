@@ -89,12 +89,14 @@
 - **FR-003**: System MUST authenticate baseline local credentials `admin` / `admin123`.
 - **FR-004**: System MUST persist transactional data in PostgreSQL.
 - **FR-005**: System MUST provide and maintain Swagger/OpenAPI documentation for exposed endpoints.
-- **FR-006**: System MUST be executable in Docker, including local dependency orchestration.
+- **FR-006**: System MUST version public API endpoints explicitly (e.g., `/api/v1/...`) or document an equivalent strategy.
+- **FR-007**: System MUST be executable in Docker, including local dependency orchestration.
+- **FR-008**: System MUST define deprecation policy and migration path for breaking API changes.
 
 *Example of marking unclear requirements:*
 
-- **FR-007**: System MUST meet response time SLO of [NEEDS CLARIFICATION: p95 target not specified].
-- **FR-008**: System MUST retain application logs for [NEEDS CLARIFICATION: retention period not specified].
+- **FR-009**: System MUST meet response time SLO of [NEEDS CLARIFICATION: p95 target not specified].
+- **FR-010**: System MUST retain application logs for [NEEDS CLARIFICATION: retention period not specified].
 
 ### Key Entities *(include if feature involves data)*
 

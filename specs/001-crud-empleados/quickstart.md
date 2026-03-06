@@ -67,19 +67,20 @@ Autenticación de prueba (Basic Auth):
 - Listado obligatorio con `page` y `size`.
 - Eliminación física de empleado.
 
-## 6) Resultado de validación E2E (2026-03-03)
+## 6) Resultado de validación E2E (2026-03-06)
 
 - Comando ejecutado: `docker compose -f docker/compose.yml up -d --build`
 - Resultado: bloqueado por entorno local sin Docker Engine activo.
 - Error observado: `open //./pipe/dockerDesktopLinuxEngine: El sistema no puede encontrar el archivo especificado.`
+- Verificación adicional: `http://localhost:8080/swagger-ui/index.html` no accesible (`No es posible conectar con el servidor remoto`).
 
 ### Próximo paso para validar E2E
 
 1. Iniciar Docker Desktop.
 2. Ejecutar `docker compose -f docker/compose.yml up -d --build`.
 3. Probar endpoints con Basic Auth (`admin/admin123`) en `http://localhost:8080`:
-  - `POST /api/empleados`
-  - `GET /api/empleados/{clave}`
-  - `GET /api/empleados?page=0&size=10`
-  - `PUT /api/empleados/{clave}`
-  - `DELETE /api/empleados/{clave}`
+  - `POST /api/v1/empleados`
+  - `GET /api/v1/empleados/{clave}`
+  - `GET /api/v1/empleados?page=0&size=10`
+  - `PUT /api/v1/empleados/{clave}`
+  - `DELETE /api/v1/empleados/{clave}`
