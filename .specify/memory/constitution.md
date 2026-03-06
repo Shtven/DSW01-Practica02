@@ -1,20 +1,16 @@
 <!--
 Sync Impact Report
-- Version change: 0.0.0-template → 1.0.0
+- Version change: 1.0.0 → 1.1.0
 - Modified principles:
-	- [PRINCIPLE_1_NAME] → I. Backend-First con Spring Boot 3 y Java 17
-	- [PRINCIPLE_2_NAME] → II. Seguridad Obligatoria con Basic Auth
-	- [PRINCIPLE_3_NAME] → III. Persistencia PostgreSQL y Contratos de Datos
-	- [PRINCIPLE_4_NAME] → IV. Entrega Contenerizada con Docker
-	- [PRINCIPLE_5_NAME] → V. Contratos API y Documentación Swagger
+	- V. Contratos API y Documentación Swagger → V. Contratos API, Versionado y Documentación Swagger
 - Added sections:
-	- Restricciones Técnicas Obligatorias
-	- Flujo de Desarrollo y Puertas de Calidad
+	- Política de Versionado de API
 - Removed sections: None
 - Templates requiring updates:
 	- ✅ .specify/templates/plan-template.md
 	- ✅ .specify/templates/spec-template.md
 	- ✅ .specify/templates/tasks-template.md
+	- ✅ .github/agents/copilot-instructions.md
 	- ⚠ pending (not found): .specify/templates/commands/*.md
 	- ⚠ pending (not found): README.md
 	- ⚠ pending (not found): docs/quickstart.md
@@ -54,11 +50,21 @@ La configuración de infraestructura local MUST ser reproducible por cualquier d
 con comandos documentados.
 Rationale: reducir diferencias entre entornos y facilitar integración continua.
 
-### V. Contratos API y Documentación Swagger
+### V. Contratos API, Versionado y Documentación Swagger
 Toda API REST MUST exponer documentación OpenAPI/Swagger actualizada y accesible, incluyendo
 requerimientos de autenticación, códigos de error y ejemplos de payload cuando sea posible.
-Ningún endpoint productivo se considera terminado si no aparece en la especificación.
-Rationale: mejorar trazabilidad funcional y consumo seguro por clientes.
+Todo endpoint público MUST publicarse con versión explícita de API en su ruta (por ejemplo,
+`/api/v1/...`) o en una estrategia equivalente documentada y validada en contrato.
+Ningún endpoint productivo se considera terminado si no aparece en la especificación versionada.
+Rationale: mejorar trazabilidad funcional, compatibilidad evolutiva y consumo seguro por clientes.
+
+## Política de Versionado de API
+
+- El versionado MUST usar versión mayor explícita y estable para consumidores.
+- Cambios incompatibles MUST incrementar versión mayor de API.
+- Cambios compatibles MAY mantenerse en la misma versión mayor.
+- Toda versión en deprecación MUST documentar fecha objetivo de retiro y plan de migración.
+- El contrato OpenAPI MUST reflejar la versión vigente y cualquier deprecación activa.
 
 ## Restricciones Técnicas Obligatorias
 
@@ -74,8 +80,9 @@ Rationale: mejorar trazabilidad funcional y consumo seguro por clientes.
 1. Todo cambio MUST iniciar con una especificación funcional y técnica trazable.
 2. Todo PR MUST incluir evidencia de compilación exitosa y pruebas relevantes.
 3. Todo cambio de endpoint MUST actualizar Swagger/OpenAPI en el mismo PR.
-4. Todo cambio de persistencia MUST incluir migración de esquema y validación de impacto.
-5. Todo cambio de infraestructura local MUST mantener ejecución por Docker sin pasos manuales
+4. Todo cambio de endpoint público MUST validar impacto de versionado de API.
+5. Todo cambio de persistencia MUST incluir migración de esquema y validación de impacto.
+6. Todo cambio de infraestructura local MUST mantener ejecución por Docker sin pasos manuales
 	 ocultos.
 
 ## Governance
@@ -91,4 +98,4 @@ Esta constitución prevalece sobre prácticas ad-hoc del repositorio.
 - Revisión de cumplimiento: cada plan, spec y tasks MUST incluir verificación explícita de
 	cumplimiento constitucional antes de implementación y antes de merge.
 
-**Version**: 1.0.0 | **Ratified**: 2026-02-25 | **Last Amended**: 2026-02-25
+**Version**: 1.1.0 | **Ratified**: 2026-02-25 | **Last Amended**: 2026-03-06
