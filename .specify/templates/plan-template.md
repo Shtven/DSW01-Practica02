@@ -17,15 +17,15 @@
   the iteration process.
 -->
 
-**Language/Version**: Java 17 (MUST for backend work)  
-**Primary Dependencies**: Spring Boot 3.x, Spring Security, Spring Data JPA, springdoc-openapi  
+**Language/Version**: Java 17 (backend MUST) + TypeScript 5.x (frontend MUST when web UI applies)  
+**Primary Dependencies**: Spring Boot 3.x, Spring Security, Spring Data JPA, springdoc-openapi, Angular 21.x  
 **Storage**: PostgreSQL (MUST)  
 **Testing**: JUnit 5, Spring Boot Test, integration tests with PostgreSQL  
 **Target Platform**: Linux container runtime via Docker
-**Project Type**: backend web-service  
+**Project Type**: backend service or full-stack web app (Angular 21 + backend)  
 **API Versioning Strategy**: [NEEDS CLARIFICATION: endpoint versioning approach, e.g., /api/v1]  
 **Performance Goals**: [NEEDS CLARIFICATION: feature-specific SLOs]  
-**Constraints**: HTTP Basic Auth required; Swagger/OpenAPI required; Dockerized execution required  
+**Constraints**: HTTP Basic Auth required; Swagger/OpenAPI required; Dockerized backend execution required; Angular 21 required for web frontend  
 **Scale/Scope**: [NEEDS CLARIFICATION: expected traffic and data volume]
 
 ## Constitution Check
@@ -33,6 +33,7 @@
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - Runtime gate: design MUST target Spring Boot 3.x on Java 17.
+- Frontend gate: if feature includes web UI, design MUST target Angular 21.x.
 - Security gate: protected endpoints MUST require HTTP Basic Auth.
 - Data gate: persistence MUST use PostgreSQL and include migration impact analysis.
 - Delivery gate: local execution MUST be reproducible with Docker/Docker Compose.

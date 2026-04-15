@@ -85,8 +85,9 @@
 ### Functional Requirements
 
 - **FR-001**: Backend service MUST run on Spring Boot 3.x with Java 17.
+- **FR-001A**: If the feature includes web frontend scope, UI MUST run on Angular 21.x.
 - **FR-002**: System MUST protect business endpoints using HTTP Basic Authentication.
-- **FR-003**: System MUST authenticate baseline local credentials `admin` / `admin123`.
+- **FR-003**: System MUST authenticate baseline local credentials `admin` / `admin123`, or an equivalent documented admin identifier when login is email-based (keeping `admin123` as base local secret).
 - **FR-004**: System MUST persist transactional data in PostgreSQL.
 - **FR-005**: System MUST provide and maintain Swagger/OpenAPI documentation for exposed endpoints.
 - **FR-006**: System MUST version public API endpoints explicitly (e.g., `/api/v1/...`) or document an equivalent strategy.

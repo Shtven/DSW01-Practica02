@@ -37,7 +37,7 @@ public class EmpleadoController {
         this.empleadoService = empleadoService;
     }
 
-    @Operation(summary = "Crear empleado")
+    @Operation(summary = "Crear empleado", description = "Requiere contrasena de 8+ caracteres con al menos una letra y un numero")
     @ApiResponse(responseCode = "201", description = "Empleado creado")
     @ApiResponse(responseCode = "400", description = "Solicitud inválida")
     @ApiResponse(responseCode = "401", description = "No autenticado")
@@ -73,7 +73,7 @@ public class EmpleadoController {
         return empleadoService.list(page, size);
     }
 
-    @Operation(summary = "Actualizar empleado")
+    @Operation(summary = "Actualizar empleado", description = "Permite actualizar correo y contrasena; el login usa correo en comparacion case-insensitive")
     @ApiResponse(responseCode = "200", description = "Empleado actualizado")
     @ApiResponse(responseCode = "400", description = "Solicitud inválida")
     @ApiResponse(responseCode = "401", description = "No autenticado")

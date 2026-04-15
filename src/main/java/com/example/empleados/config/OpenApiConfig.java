@@ -16,14 +16,15 @@ public class OpenApiConfig {
 
         return new OpenAPI()
             .info(new Info()
-                .title("API CRUD Empleados")
+                .title("API CRUD Empleados y Departamentos")
                 .version("1.0.0")
-                .description("API para gestión de empleados con autenticación HTTP Basic"))
+                .description("API para gestion de empleados y departamentos con autenticacion HTTP Basic por empleado"))
             .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
             .schemaRequirement(securitySchemeName,
                 new SecurityScheme()
                     .name(securitySchemeName)
                     .type(SecurityScheme.Type.HTTP)
-                    .scheme("basic"));
+                    .scheme("basic")
+                    .description("Username: correo de empleado en minusculas, Password: contrasena de empleado"));
     }
 }

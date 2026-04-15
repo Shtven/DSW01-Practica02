@@ -1,0 +1,204 @@
+openapi: 3.0.3
+info:
+  title: Frontend Angular API Consumption Contract
+  version: 1.0.0
+  description: Contrato de consumo de endpoints REST desde SPA Angular 21 con autenticacion HTTP Basic.
+servers:
+  - url: http://localhost:8080
+security:
+  - basicAuth: []
+paths:
+  /api/v1/empleados:
+    get:
+      summary: Listar empleados paginados
+      operationId: listEmpleados
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: size
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        '200':
+          description: Pagina de empleados
+        '400':
+          description: Parametros invalidos
+        '401':
+          description: No autenticado
+    post:
+      summary: Crear empleado
+      operationId: createEmpleado
+      responses:
+        '201':
+          description: Empleado creado
+        '400':
+          description: Solicitud invalida
+        '401':
+          description: No autenticado
+        '404':
+          description: Departamento no encontrado
+
+  /api/v1/empleados/{clave}:
+    get:
+      summary: Consultar empleado por clave
+      operationId: getEmpleadoByClave
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            pattern: '^E[0-9]+$'
+      responses:
+        '200':
+          description: Empleado encontrado
+        '401':
+          description: No autenticado
+        '404':
+          description: Empleado no encontrado
+    put:
+      summary: Actualizar empleado
+      operationId: updateEmpleado
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            pattern: '^E[0-9]+$'
+      responses:
+        '200':
+          description: Empleado actualizado
+        '400':
+          description: Solicitud invalida
+        '401':
+          description: No autenticado
+        '403':
+          description: Operacion no permitida
+        '404':
+          description: Empleado o departamento no encontrado
+    delete:
+      summary: Eliminar empleado
+      operationId: deleteEmpleado
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            pattern: '^E[0-9]+$'
+      responses:
+        '204':
+          description: Empleado eliminado
+        '401':
+          description: No autenticado
+        '404':
+          description: Empleado no encontrado
+
+  /api/v1/departamentos:
+    get:
+      summary: Listar departamentos paginados
+      operationId: listDepartamentos
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: size
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        '200':
+          description: Pagina de departamentos
+        '400':
+          description: Parametros invalidos
+        '401':
+          description: No autenticado
+    post:
+      summary: Crear departamento
+      operationId: createDepartamento
+      responses:
+        '201':
+          description: Departamento creado
+        '400':
+          description: Solicitud invalida
+        '401':
+          description: No autenticado
+
+  /api/v1/departamentos/{clave}:
+    get:
+      summary: Consultar departamento por clave
+      operationId: getDepartamentoByClave
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            pattern: '^D[0-9]+$'
+      responses:
+        '200':
+          description: Departamento encontrado
+        '401':
+          description: No autenticado
+        '404':
+          description: Departamento no encontrado
+    put:
+      summary: Actualizar departamento
+      operationId: updateDepartamento
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            pattern: '^D[0-9]+$'
+      responses:
+        '200':
+          description: Departamento actualizado
+        '400':
+          description: Solicitud invalida
+        '401':
+          description: No autenticado
+        '404':
+          description: Departamento no encontrado
+    delete:
+      summary: Eliminar departamento
+      operationId: deleteDepartamento
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            pattern: '^D[0-9]+$'
+      responses:
+        '204':
+          description: Departamento eliminado
+        '400':
+          description: Departamento con empleados asociados
+        '401':
+          description: No autenticado
+        '404':
+          description: Departamento no encontrado
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Username y password de administrador en sesion activa de frontend.

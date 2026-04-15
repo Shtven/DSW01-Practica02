@@ -1,13 +1,192 @@
 openapi: 3.0.3
 info:
-  title: API CRUD Empleados
-  version: 1.0.0
-  description: Contrato inicial para gestión de empleados.
+  title: API CRUD Empleados y Departamentos
+  version: 1.1.0
+  description: Contrato para gestión de empleados y departamentos.
 servers:
   - url: http://localhost:8080
 security:
   - basicAuth: []
 paths:
+  /api/v1/departamentos:
+    get:
+      summary: Listar departamentos paginados
+      operationId: listDepartamentos
+      security:
+        - basicAuth: []
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: size
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        '200':
+          description: Pagina de departamentos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoPageResponse'
+        '400':
+          description: Parametros invalidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Crear departamento
+      operationId: createDepartamento
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartamentoRequest'
+      responses:
+        '201':
+          description: Departamento creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '400':
+          description: Solicitud invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/departamentos/{clave}:
+    get:
+      summary: Consultar departamento por clave
+      operationId: getDepartamentoByClave
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            maxLength: 32
+      responses:
+        '200':
+          description: Departamento encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '404':
+          description: Departamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Actualizar departamento por clave
+      operationId: updateDepartamentoByClave
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            maxLength: 32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartamentoRequest'
+      responses:
+        '200':
+          description: Departamento actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '400':
+          description: Solicitud invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Departamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Eliminar departamento por clave
+      operationId: deleteDepartamentoByClave
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            maxLength: 32
+      responses:
+        '204':
+          description: Departamento eliminado
+        '400':
+          description: Solicitud invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Departamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/v1/empleados:
     get:
       summary: Listar empleados paginados
@@ -30,13 +209,13 @@ paths:
             maximum: 200
       responses:
         '200':
-          description: Página de empleados
+          description: Pagina de empleados
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EmpleadoPageResponse'
         '400':
-          description: Parámetros inválidos
+          description: Parametros invalidos
           content:
             application/json:
               schema:
@@ -66,7 +245,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmpleadoResponse'
         '400':
-          description: Solicitud inválida
+          description: Solicitud invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Departamento no encontrado
           content:
             application/json:
               schema:
@@ -136,13 +321,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmpleadoResponse'
         '400':
-          description: Solicitud inválida
+          description: Solicitud invalida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Empleado no encontrado
+          description: Empleado o departamento no encontrado
           content:
             application/json:
               schema:
@@ -167,7 +352,7 @@ paths:
             pattern: '^E[0-9]+$'
       responses:
         '204':
-          description: Empleado eliminado físicamente
+          description: Empleado eliminado
         '404':
           description: Empleado no encontrado
           content:
@@ -188,10 +373,64 @@ components:
       scheme: basic
 
   schemas:
+    DepartamentoRequest:
+      type: object
+      additionalProperties: false
+      required: [clave, nombre]
+      properties:
+        clave:
+          type: string
+          minLength: 1
+          maxLength: 32
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+
+    DepartamentoResponse:
+      type: object
+      additionalProperties: false
+      required: [clave, nombre, empleados]
+      properties:
+        clave:
+          type: string
+          maxLength: 32
+        nombre:
+          type: string
+          maxLength: 100
+        empleados:
+          type: array
+          items:
+            type: string
+            pattern: '^E[0-9]+$'
+
+    DepartamentoPageResponse:
+      type: object
+      additionalProperties: false
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepartamentoResponse'
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+        totalElements:
+          type: integer
+          format: int64
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+
     CreateEmpleadoRequest:
       type: object
       additionalProperties: false
-      required: [nombre, direccion, telefono]
+      required: [nombre, direccion, telefono, departamentoClave]
       properties:
         nombre:
           type: string
@@ -205,11 +444,15 @@ components:
           type: string
           minLength: 1
           maxLength: 100
+        departamentoClave:
+          type: string
+          minLength: 1
+          maxLength: 32
 
     UpdateEmpleadoRequest:
       type: object
       additionalProperties: false
-      required: [nombre, direccion, telefono]
+      required: [nombre, direccion, telefono, departamentoClave]
       properties:
         nombre:
           type: string
@@ -223,11 +466,15 @@ components:
           type: string
           minLength: 1
           maxLength: 100
+        departamentoClave:
+          type: string
+          minLength: 1
+          maxLength: 32
 
     EmpleadoResponse:
       type: object
       additionalProperties: false
-      required: [clave, nombre, direccion, telefono]
+      required: [clave, nombre, direccion, telefono, departamentoClave]
       properties:
         clave:
           type: string
@@ -242,6 +489,9 @@ components:
         telefono:
           type: string
           maxLength: 100
+        departamentoClave:
+          type: string
+          maxLength: 32
 
     EmpleadoPageResponse:
       type: object

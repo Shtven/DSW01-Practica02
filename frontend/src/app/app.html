@@ -1,0 +1,20 @@
+<header class="topbar">
+  <h1>DSW Empleados</h1>
+
+  <nav *ngIf="isAuthenticated()">
+    <a routerLink="/empleados">Empleados</a>
+    <a routerLink="/departamentos">Departamentos</a>
+  </nav>
+
+  <div class="session" *ngIf="isAuthenticated()">
+    <span>{{ username() }}</span>
+    <button type="button" (click)="logout()">Cerrar sesion</button>
+  </div>
+</header>
+
+<main class="content">
+  <p class="notice" *ngIf="!isAuthenticated()">
+    Si la UI inicia pero no muestra datos, verifica que `API_BASE_URL` apunte al backend y vuelve a intentar.
+  </p>
+  <router-outlet></router-outlet>
+</main>

@@ -1,0 +1,84 @@
+contract: nginx-compose-proxy
+version: 1.0.0
+feature: 001-nginx-compose-proxy
+summary: >-
+  Compose ingress contract where Nginx is the single public entry point,
+  serving frontend at / and proxying API requests under /api/*.
+
+services:
+  nginx:
+    required: true
+    role: public-gateway
+    exposure:
+      hostPublished: true
+      containerPort: 80
+    routes:
+      frontend:
+        publicPath: /
+        behavior: serve-static-spa
+      api:
+        publicPathPrefix: /api/
+        behavior: reverse-proxy
+        preserveVersionedPaths: true
+    upstream:
+      backendService: app
+      backendPort: 8080
+
+  app:
+    required: true
+    role: spring-boot-api
+    exposure:
+      hostPublishedByDefault: false
+      containerPort: 8080
+    auth:
+      mode: basic
+    apiVersioning:
+      requiredPrefix: /api/v1
+
+  postgres:
+    required: true
+    role: persistence
+    image: postgres:16
+    exposure:
+      hostPublishedByDefault: false
+      containerPort: 5432
+
+networking:
+  serviceDiscovery: compose-dns
+  hostLoopbackForbiddenForUpstream: true
+
+failureBehavior:
+  backendUnavailable:
+    frontendStillAvailableAtRoot: true
+    apiReturnsControlledProxyError: true
+    apiErrorResponse:
+      statusCode: 503
+      contentType: application/json
+      requiredFields:
+        - status
+        - error
+        - message
+        - path
+
+operations:
+  startup:
+    command: docker compose -f docker/compose.yml up -d --build
+  shutdown:
+    command: docker compose -f docker/compose.yml down
+
+nonRegression:
+  basicAuthPreserved: true
+  apiVersioningPreserved: true
+  openApiAvailabilityPreserved: true
+
+acceptanceMapping:
+  - id: FR-011C
+    assertion: only nginx is host-published by default
+  - id: FR-011B
+    assertion: frontend served at / and API routed at /api/*
+  - id: FR-016
+    assertion: frontend remains available while API returns controlled error during backend outage
+  - id: SC-001
+    assertion: 10/10 one-command stack startups succeed
+  - id: SC-002
+    assertion: >=95% successful API requests through proxy without manual reconfiguration

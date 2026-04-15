@@ -61,7 +61,9 @@ Autenticación de prueba (Basic Auth):
 
 ## 5) Validaciones clave del MVP
 
+- Alta previa de departamento (`POST /api/v1/departamentos`) para poder asociar empleados.
 - Alta de empleado sin `clave` en payload (autogenerada por sistema con formato `E` + secuencia numérica).
+- Alta/actualización de empleado con `departamentoClave` obligatorio y existente.
 - Operaciones por identificador (`GET/PUT/DELETE`) solo con `clave` que cumpla patrón `E` + dígitos.
 - Validación de `nombre`, `direccion`, `telefono` con máximo 100 caracteres.
 - Listado obligatorio con `page` y `size`.
@@ -79,6 +81,8 @@ Autenticación de prueba (Basic Auth):
 1. Iniciar Docker Desktop.
 2. Ejecutar `docker compose -f docker/compose.yml up -d --build`.
 3. Probar endpoints con Basic Auth (`admin/admin123`) en `http://localhost:8080`:
+  - `POST /api/v1/departamentos`
+  - `GET /api/v1/departamentos/{clave}`
   - `POST /api/v1/empleados`
   - `GET /api/v1/empleados/{clave}`
   - `GET /api/v1/empleados?page=0&size=10`

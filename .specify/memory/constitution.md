@@ -1,39 +1,38 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 1.1.0
+- Version change: 1.2.0 → 1.2.1
 - Modified principles:
-	- V. Contratos API y Documentación Swagger → V. Contratos API, Versionado y Documentación Swagger
+  - II. Seguridad Obligatoria con Basic Auth (clarificación para login por correo)
 - Added sections:
-	- Política de Versionado de API
+  - None
 - Removed sections: None
 - Templates requiring updates:
-	- ✅ .specify/templates/plan-template.md
-	- ✅ .specify/templates/spec-template.md
-	- ✅ .specify/templates/tasks-template.md
-	- ✅ .github/agents/copilot-instructions.md
-	- ⚠ pending (not found): .specify/templates/commands/*.md
-	- ⚠ pending (not found): README.md
-	- ⚠ pending (not found): docs/quickstart.md
+  - ✅ .specify/templates/spec-template.md
+  - ⚠ pending (not found): .specify/templates/commands/*.md
 - Follow-up TODOs:
-	- TODO(COMMAND_TEMPLATES): Crear .specify/templates/commands/ cuando exista automatización de comandos.
-	- TODO(RUNTIME_GUIDE): Agregar README.md o docs/quickstart.md con referencia explícita a esta constitución.
+  - TODO(COMMAND_TEMPLATES): Crear .specify/templates/commands/ cuando exista automatización de comandos.
+  - TODO(RUNTIME_GUIDE): Agregar README.md o docs/quickstart.md con referencia a credenciales base/equivalentes locales.
 -->
 
 # DSW01-Practica02 Constitution
 
 ## Core Principles
 
-### I. Backend-First con Spring Boot 3 y Java 17
-Todo desarrollo del servicio backend MUST ejecutarse sobre Spring Boot 3.x y Java 17.
-No se permiten features nuevas en versiones anteriores de Java o Spring. Cualquier excepción
-MUST documentar su justificación técnica y un plan de migración para volver al baseline.
-Rationale: mantener soporte LTS, seguridad y compatibilidad de dependencias.
+### I. Full-Stack Base: Spring Boot 3, Java 17 y Angular 21
+Todo desarrollo backend MUST ejecutarse sobre Spring Boot 3.x y Java 17. Todo desarrollo
+frontend web MUST ejecutarse sobre Angular 21.x. No se permiten features nuevas en stacks
+inferiores para backend o frontend. Cualquier excepción MUST documentar justificación
+técnica, alcance temporal y plan de retorno al baseline.
+Rationale: mantener soporte moderno, coherencia tecnológica y menor costo de mantenimiento.
 
 ### II. Seguridad Obligatoria con Basic Auth
 Todos los endpoints de negocio MUST requerir autenticación HTTP Basic. Las credenciales de
 entorno base MUST ser `admin` / `admin123` para entorno local de desarrollo y pruebas
-controladas. En ambientes no locales, estas credenciales MUST externalizarse mediante
-variables de entorno o secret manager, sin valores hardcodeados en código Java.
+controladas. Cuando una feature use identificador de login por correo (en lugar de username),
+MUST definirse una credencial local equivalente con secreto base `admin123` e identificador
+administrativo documentado (por ejemplo, `admin@example.com`). En ambientes no locales, estas
+credenciales MUST externalizarse mediante variables de entorno o secret manager, sin valores
+hardcodeados en código Java.
 Rationale: establecer una seguridad mínima uniforme y verificable desde el inicio.
 
 ### III. Persistencia PostgreSQL y Contratos de Datos
@@ -66,10 +65,19 @@ Rationale: mejorar trazabilidad funcional, compatibilidad evolutiva y consumo se
 - Toda versión en deprecación MUST documentar fecha objetivo de retiro y plan de migración.
 - El contrato OpenAPI MUST reflejar la versión vigente y cualquier deprecación activa.
 
+## Política de Frontend Web
+
+- El frontend web MUST ser una SPA basada en Angular 21.x.
+- La integración con backend MUST consumir endpoints versionados (por ejemplo, `/api/v1/...`).
+- El frontend MUST manejar estados de autenticación y errores HTTP de forma consistente y
+	auditable.
+- El build de frontend MUST ser reproducible en local y en CI.
+
 ## Restricciones Técnicas Obligatorias
 
 - Runtime MUST ser Java 17.
 - Framework backend MUST ser Spring Boot 3.x.
+- Framework frontend web MUST ser Angular 21.x.
 - Base de datos MUST ser PostgreSQL.
 - Seguridad de API MUST usar HTTP Basic Authentication.
 - Documentación de API MUST publicarse con Swagger/OpenAPI.
@@ -84,6 +92,7 @@ Rationale: mejorar trazabilidad funcional, compatibilidad evolutiva y consumo se
 5. Todo cambio de persistencia MUST incluir migración de esquema y validación de impacto.
 6. Todo cambio de infraestructura local MUST mantener ejecución por Docker sin pasos manuales
 	 ocultos.
+7. Todo cambio de frontend MUST validar build y compatibilidad de integración con API versionada.
 
 ## Governance
 
@@ -98,4 +107,4 @@ Esta constitución prevalece sobre prácticas ad-hoc del repositorio.
 - Revisión de cumplimiento: cada plan, spec y tasks MUST incluir verificación explícita de
 	cumplimiento constitucional antes de implementación y antes de merge.
 
-**Version**: 1.1.0 | **Ratified**: 2026-02-25 | **Last Amended**: 2026-03-06
+**Version**: 1.2.1 | **Ratified**: 2026-02-25 | **Last Amended**: 2026-03-13
