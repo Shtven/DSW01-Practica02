@@ -1,0 +1,79 @@
+contract: docker-compose-stack
+version: 1.0.0
+feature: 002-frontend-dockerfile-compose
+summary: >-
+  Operational compose contract for full-stack local startup with frontend integrated
+  through Dockerfile, backend API, and PostgreSQL.
+
+services:
+  frontend:
+    required: true
+    runtime:
+      mode: nginx-static
+      source: angular-production-build
+    build:
+      context: frontend
+      dockerfile: frontend/Dockerfile
+    exposure:
+      hostPort: 4200
+      containerPort: 80
+      publicByDefault: true
+    configuration:
+      apiBaseUrlDefault: http://app:8080
+      runtimeInjectionRequired: true
+    startupDependency:
+      backendHealthRequired: true
+
+  app:
+    required: true
+    runtime:
+      platform: spring-boot-java17
+    exposure:
+      hostPortPublishedByDefault: false
+      containerPort: 8080
+    health:
+      required: true
+      usedByDependsOn: true
+    api:
+      basePath: /api/v1
+      auth: basic
+
+  postgres:
+    required: true
+    image: postgres:16
+    exposure:
+      hostPortPublishedByDefault: false
+      containerPort: 5432
+    persistence:
+      volumeRequired: true
+      volumeName: pgdata
+
+networking:
+  serviceDiscovery: compose-dns
+  backendHostName: app
+  frontendMustNotUseHostLoopbackForApi: true
+
+operations:
+  startup:
+    command: docker compose -f docker/compose.yml up -d --build
+    expectedOrder:
+      - postgres-ready
+      - app-healthy
+      - frontend-running
+  shutdown:
+    command: docker compose -f docker/compose.yml down
+
+nonRegression:
+  swaggerOpenApiAccessible: true
+  backendBehaviorUnchanged: true
+  postgresPersistenceUnchanged: true
+
+acceptanceMapping:
+  - id: SC-001
+    assertion: 10/10 successful full-stack startups with one command
+  - id: SC-002
+    assertion: >=95% initial UI loads allow authenticated read + write flow without manual reconfiguration
+  - id: SC-003
+    assertion: >=95% startup attempts expose UI in under 60 seconds
+  - id: SC-004
+    assertion: 100% onboarding success for at least 2 team members following documentation only

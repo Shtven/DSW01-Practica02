@@ -1,0 +1,82 @@
+contract: docker-compose-stack
+version: 1.0.0
+feature: 001-frontend-dockerfile-compose
+summary: >-
+  Operational contract for local full-stack orchestration with frontend container,
+  backend API, and PostgreSQL.
+
+services:
+  frontend:
+    required: true
+    role: angular-static-ui
+    runtime:
+      server: nginx
+      staticArtifactsSource: angular-production-build
+    exposure:
+      hostPort: required
+      containerPort: 80
+      publiclyExposed: true
+    configuration:
+      apiBaseUrl:
+        source: runtime
+        required: true
+    dependencies:
+      - service: app
+        condition: service_healthy
+
+  app:
+    required: true
+    role: spring-boot-api
+    exposure:
+      hostPort: forbidden_by_default
+      containerPort: 8080
+      publiclyExposed: false
+    configuration:
+      dbHost: postgres
+      dbPort: 5432
+      authMode: basic
+      apiVersionBasePath: /api/v1
+    health:
+      required: true
+      readinessSignal: stable-http-health-endpoint
+
+  postgres:
+    required: true
+    role: transactional-storage
+    image: postgres:16
+    exposure:
+      hostPort: forbidden_by_default
+      containerPort: 5432
+      publiclyExposed: false
+    persistence:
+      volumeRequired: true
+      volumeName: pgdata
+
+networkPolicy:
+  internalServiceDiscovery: compose-dns
+  hostLoopbackDependenciesForbidden: true
+
+startupContract:
+  oneCommandStartupRequired: true
+  commandPattern: docker compose -f docker/compose.yml up -d --build
+  expectedOrder:
+    - postgres_available
+    - app_healthy
+    - frontend_running
+
+failureHandling:
+  backendTemporaryUnavailability:
+    uiMessageRequired: true
+    autoRetry:
+      enabled: true
+      strategy: linear
+      delaysMs: [300, 600]
+      maxRetries: 2
+
+acceptanceMapping:
+  - id: SC-001
+    assertion: 10/10 successful full-stack startups with one command
+  - id: SC-002
+    assertion: >=95% initial UI loads allow authenticated read flow and at least one authenticated write operation without manual reconfiguration
+  - id: SC-004
+    assertion: startup/shutdown guide executable by another team member without direct support

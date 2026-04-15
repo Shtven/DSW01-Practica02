@@ -1,0 +1,193 @@
+openapi: 3.0.3
+info:
+  title: API Empleados con Autenticacion por Correo
+  version: 1.0.0
+  description: Contrato para autenticacion Basic Auth por correo, bloqueo de correos temporales y reemplazo administrado.
+servers:
+  - url: http://localhost:8080
+security:
+  - basicAuth: []
+paths:
+  /api/v1/empleados:
+    post:
+      summary: Crear empleado con correo autenticable
+      operationId: createEmpleado
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmpleadoRequest'
+      responses:
+        '201':
+          description: Empleado creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '400':
+          description: Solicitud invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+        '404':
+          description: Departamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/empleados/{clave}:
+    put:
+      summary: Actualizar empleado y reemplazar correo temporal
+      operationId: updateEmpleado
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            pattern: '^E[0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmpleadoRequest'
+      responses:
+        '200':
+          description: Empleado actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '400':
+          description: Solicitud invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+        '403':
+          description: Operacion no permitida (reemplazo de correo temporal solo administrador)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Empleado o departamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Username = correo empleado, Password = contrasena empleado. Correos *@local.invalid* no son autenticables.
+  schemas:
+    CreateEmpleadoRequest:
+      type: object
+      additionalProperties: false
+      required: [nombre, correo, contrasena, direccion, telefono, departamentoClave]
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        correo:
+          type: string
+          format: email
+          maxLength: 254
+        contrasena:
+          type: string
+          minLength: 8
+          pattern: '^(?=.*[A-Za-z])(?=.*[0-9]).+$'
+        direccion:
+          type: string
+          minLength: 1
+          maxLength: 100
+        telefono:
+          type: string
+          minLength: 1
+          maxLength: 100
+        departamentoClave:
+          type: string
+          pattern: '^D[0-9]+$'
+    UpdateEmpleadoRequest:
+      type: object
+      additionalProperties: false
+      required: [nombre, correo, contrasena, direccion, telefono, departamentoClave]
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        correo:
+          type: string
+          format: email
+          maxLength: 254
+        contrasena:
+          type: string
+          minLength: 8
+          pattern: '^(?=.*[A-Za-z])(?=.*[0-9]).+$'
+        direccion:
+          type: string
+          minLength: 1
+          maxLength: 100
+        telefono:
+          type: string
+          minLength: 1
+          maxLength: 100
+        departamentoClave:
+          type: string
+          pattern: '^D[0-9]+$'
+    EmpleadoResponse:
+      type: object
+      additionalProperties: false
+      required: [clave, nombre, correo, direccion, telefono, departamentoClave]
+      properties:
+        clave:
+          type: string
+          pattern: '^E[0-9]+$'
+        nombre:
+          type: string
+          maxLength: 100
+        correo:
+          type: string
+          format: email
+          maxLength: 254
+        direccion:
+          type: string
+          maxLength: 100
+        telefono:
+          type: string
+          maxLength: 100
+        departamentoClave:
+          type: string
+          pattern: '^D[0-9]+$'
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [timestamp, status, error, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string

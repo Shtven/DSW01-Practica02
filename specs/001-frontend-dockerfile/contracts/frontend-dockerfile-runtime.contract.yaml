@@ -1,0 +1,64 @@
+contract: frontend-dockerfile-runtime
+version: 1.0.0
+feature: 001-frontend-dockerfile
+summary: >-
+  Runtime and operational contract for frontend Dockerfile execution using ng serve.
+
+scope:
+  composeChangesRequired: false
+  mandatoryArtifacts:
+    - frontend/Dockerfile
+    - specs/001-frontend-dockerfile/quickstart.md
+
+runtime:
+  mode: ng-serve
+  command: npm run start:docker -- --host 0.0.0.0 --port ${FRONTEND_PORT:-4200}
+  requiredEnvironment:
+    - name: API_BASE_URL
+      required: true
+      failFastOnMissing: true
+  optionalEnvironment:
+    - name: FRONTEND_PORT
+      default: "4200"
+
+network:
+  hostPort:
+    configurable: true
+    default: 4200
+  accessibility:
+    uiMustBeReachableFromHost: true
+
+resilience:
+  restartPolicy:
+    type: on-failure
+    maxRetries: 3
+    bounded: true
+
+apiIntegration:
+  backendEndpointVersioning:
+    requiredPattern: /api/v1/*
+  expectedBehavior:
+    - login-flow-works
+    - authenticated-read-flow-works
+    - fail-fast-when-api-base-url-missing
+
+operations:
+  startupShutdownChecklist:
+    - image-build-succeeds
+    - container-starts-with-required-env
+    - ui-reachable-on-published-port
+    - container-stops-cleanly
+  restartBehavior:
+    - policy: on-failure
+    - retryLimit: 3
+    - infiniteLoopPrevention: required
+
+acceptanceMapping:
+  - id: SC-001
+    assertion: 10/10 Docker builds succeed for frontend image
+  - id: SC-002
+    assertion: >=95% of 20 container starts make UI reachable in under 60 seconds
+  - id: SC-003
+    assertion: >=95% runtime executions support login and authenticated read without container reconfiguration
+  - id: SC-004
+    assertion: 100% onboarding trial success for at least 2 team members using docs only

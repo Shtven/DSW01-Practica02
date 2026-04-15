@@ -1,0 +1,61 @@
+contract: frontend-compose-build
+version: 1.0.0
+feature: 001-frontend-dockerfile-build
+summary: >-
+  Compose/container contract for frontend build simplification with a single
+  frontend Dockerfile and explicit runtime configuration.
+
+frontend:
+  build:
+    dockerfile: frontend/Dockerfile
+    context: frontend
+    legacyFolderAllowed: false
+  runtime:
+    mode: static-web-server
+    requiredEnv:
+      - API_BASE_URL
+    apiBaseUrl:
+      defaultAllowed: false
+      failFastOnMissing: true
+  exposure:
+    hostPortDefault: 4200
+    containerPort: 80
+
+composeDefaults:
+  requiredVariables:
+    - FRONTEND_API_BASE_URL
+  backend:
+    hostPortPublishedByDefault: false
+    internalServiceName: app
+    containerPort: 8080
+  database:
+    hostPortPublishedByDefault: false
+    internalServiceName: postgres
+    containerPort: 5432
+
+nonRegression:
+  basicAuthBehaviorPreserved: true
+  apiVersioningPathPreserved: /api/v1/*
+  swaggerOpenApiAvailabilityPreserved: true
+
+operations:
+  frontendImageBuild:
+    command: docker build -f frontend/Dockerfile -t empleados-frontend:local frontend
+  stackStartup:
+    command: FRONTEND_API_BASE_URL=http://app:8080 docker compose -f docker/compose.yml up -d --build
+  stackShutdown:
+    command: docker compose -f docker/compose.yml down
+
+acceptanceMapping:
+  - id: FR-009
+    assertion: frontend/docker folder removed and not referenced
+  - id: FR-010
+    assertion: frontend image builds from main Dockerfile
+  - id: FR-011B
+    assertion: frontend host port default is 4200
+  - id: FR-011C
+    assertion: backend and database are internal-only by default
+  - id: FR-013
+    assertion: container startup fails fast when API_BASE_URL is missing
+  - id: SC-002
+    assertion: fail-fast behavior is measured and completes in <=30 seconds when API_BASE_URL is missing

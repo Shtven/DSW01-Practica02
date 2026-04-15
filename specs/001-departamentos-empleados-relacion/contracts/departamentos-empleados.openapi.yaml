@@ -1,0 +1,329 @@
+openapi: 3.0.3
+info:
+  title: API Departamentos y Empleados Relacionados
+  version: 1.0.0
+  description: Contrato para gestionar departamentos y asociar empleados.
+servers:
+  - url: http://localhost:8080
+security:
+  - basicAuth: []
+paths:
+  /api/v1/departamentos:
+    post:
+      summary: Crear departamento
+      operationId: createDepartamento
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartamentoCreateRequest'
+      responses:
+        '201':
+          description: Departamento creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '400':
+          description: Solicitud invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+    get:
+      summary: Listar departamentos paginados
+      operationId: listDepartamentos
+      security:
+        - basicAuth: []
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: size
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        '200':
+          description: Pagina de departamentos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoPageResponse'
+        '400':
+          description: Parametros invalidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+
+  /api/v1/departamentos/{clave}:
+    get:
+      summary: Consultar departamento por clave
+      operationId: getDepartamentoByClave
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            pattern: '^D[0-9]+$'
+      responses:
+        '200':
+          description: Departamento encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '404':
+          description: Departamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+    put:
+      summary: Actualizar nombre de departamento
+      operationId: updateDepartamento
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            pattern: '^D[0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartamentoUpdateRequest'
+      responses:
+        '200':
+          description: Departamento actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '400':
+          description: Solicitud invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Departamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+    delete:
+      summary: Eliminar departamento sin empleados asociados
+      operationId: deleteDepartamento
+      security:
+        - basicAuth: []
+      parameters:
+        - in: path
+          name: clave
+          required: true
+          schema:
+            type: string
+            pattern: '^D[0-9]+$'
+      responses:
+        '204':
+          description: Departamento eliminado
+        '400':
+          description: Departamento con empleados asociados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Departamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+
+  /api/v1/empleados:
+    post:
+      summary: Crear empleado asociado a departamento
+      operationId: createEmpleado
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmpleadoCreateRequest'
+      responses:
+        '201':
+          description: Empleado creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '400':
+          description: Solicitud invalida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Departamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No autenticado
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    DepartamentoCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [nombre]
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+
+    DepartamentoUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [nombre]
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+
+    DepartamentoResponse:
+      type: object
+      additionalProperties: false
+      required: [clave, nombre, empleados]
+      properties:
+        clave:
+          type: string
+          pattern: '^D[0-9]+$'
+          example: D1
+        nombre:
+          type: string
+          maxLength: 100
+        empleados:
+          type: array
+          items:
+            type: string
+            pattern: '^E[0-9]+$'
+
+    DepartamentoPageResponse:
+      type: object
+      additionalProperties: false
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepartamentoResponse'
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+        totalElements:
+          type: integer
+          format: int64
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+
+    EmpleadoCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [nombre, direccion, telefono, departamentoClave]
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        direccion:
+          type: string
+          minLength: 1
+          maxLength: 100
+        telefono:
+          type: string
+          minLength: 1
+          maxLength: 100
+        departamentoClave:
+          type: string
+          pattern: '^D[0-9]+$'
+
+    EmpleadoResponse:
+      type: object
+      additionalProperties: false
+      required: [clave, nombre, direccion, telefono, departamentoClave]
+      properties:
+        clave:
+          type: string
+          pattern: '^E[0-9]+$'
+          example: E1
+        nombre:
+          type: string
+          maxLength: 100
+        direccion:
+          type: string
+          maxLength: 100
+        telefono:
+          type: string
+          maxLength: 100
+        departamentoClave:
+          type: string
+          pattern: '^D[0-9]+$'
+
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [timestamp, status, error, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
