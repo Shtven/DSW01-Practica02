@@ -20,6 +20,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-25
 - PostgreSQL 16 (compose service `postgres`) (001-nginx-compose-proxy)
 - Java 17 (backend), TypeScript (Angular frontend), YAML (Docker Compose y Nginx templates) + Spring Boot 3.x backend, Angular frontend containerizado con Nginx, Docker Compose v2 (001-frontend-proxy-compose)
 - PostgreSQL 16 en contenedor interno (001-frontend-proxy-compose)
+- YAML (GitHub Actions), Java 17 (backend), TypeScript/Node LTS (frontend) + GitHub Actions runner, Maven Wrapper, npm scripts del frontend (001-github-workflow-tests)
+- PostgreSQL (sin cambios en esta feature) (001-github-workflow-tests)
 
 - Java 17 (MUST for backend work) + Spring Boot 3.x, Spring Security, Spring Data JPA, springdoc-openapi (001-crud-empleados)
 
@@ -46,9 +48,9 @@ Java 17 (MUST for backend work): Follow standard conventions
 Angular 21.x (frontend web MUST when applicable): Use Angular CLI conventions and standalone-first architecture
 
 ## Recent Changes
+- 001-github-workflow-tests: Added YAML (GitHub Actions), Java 17 (backend), TypeScript/Node LTS (frontend) + GitHub Actions runner, Maven Wrapper, npm scripts del frontend
 - 001-frontend-proxy-compose: Added Java 17 (backend), TypeScript (Angular frontend), YAML (Docker Compose y Nginx templates) + Spring Boot 3.x backend, Angular frontend containerizado con Nginx, Docker Compose v2
 - 001-nginx-compose-proxy: Added Java 17 (backend) + TypeScript 5.x (frontend Angular 21) + Spring Boot 3.x, Spring Security, Spring Data JPA, springdoc-openapi, Angular 21.x, Nginx 1.27 (container)
-- 001-frontend-dockerfile-build: Added Java 17 (backend), TypeScript 5.x (frontend Angular 21) + Spring Boot 3.x, Spring Security, Spring Data JPA, springdoc-openapi, Angular 21.x, Docker Compose, Nginx runtime image
 
 
 <!-- MANUAL ADDITIONS START -->

@@ -106,5 +106,6 @@ Esta constitución prevalece sobre prácticas ad-hoc del repositorio.
 	- PATCH: clarifica redacción sin cambiar obligaciones normativas.
 - Revisión de cumplimiento: cada plan, spec y tasks MUST incluir verificación explícita de
 	cumplimiento constitucional antes de implementación y antes de merge.
+	
 
 **Version**: 1.2.1 | **Ratified**: 2026-02-25 | **Last Amended**: 2026-03-13
