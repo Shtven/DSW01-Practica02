@@ -1,0 +1,66 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sonarqube:
+    name: SonarQube Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build backend classes
+        run: mvn -B -DskipTests compile
+
+      - name: Validate Sonar secrets
+        run: |
+          if [ -z "${{ secrets.SONARTOKEN }}" ]; then
+            echo "Missing required secret: SONARTOKEN"
+            exit 1
+          fi
+          if [ -z "${{ secrets.SONAR_HOST_URL }}" ]; then
+            echo "Missing required secret: SONAR_HOST_URL"
+            exit 1
+          fi
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARTOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=DSW01-Practica02
+            -Dsonar.projectName=DSW01-Practica02
+            -Dsonar.sources=src,frontend/src
+            -Dsonar.tests=src/test,frontend/src
+
+      - name: SonarQube Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARTOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
