@@ -37,7 +37,7 @@ jobs:
 
       - name: Validate Sonar secrets
         run: |
-          if [ -z "${{ secrets.SONARTOKEN }}" ]; then
+          if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
             echo "Missing required secret: SONARTOKEN"
             exit 1
           fi
