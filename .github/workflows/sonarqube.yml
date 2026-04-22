@@ -53,8 +53,9 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           args: >
-            -Dsonar.projectKey=DSW01-Practica02
-            -Dsonar.projectName=DSW01-Practica02
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.projectName=${{ secrets.SONAR_PROJECT_NAME }}
             -Dsonar.sources=src,frontend/src
             -Dsonar.tests=src/test,frontend/src
 
