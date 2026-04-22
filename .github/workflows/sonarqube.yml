@@ -38,7 +38,7 @@ jobs:
       - name: Validate Sonar secrets
         run: |
           if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
-            echo "Missing required secret: SONARTOKEN"
+            echo "Missing required secret: SONAR_TOKEN"
             exit 1
           fi
           if [ -z "${{ secrets.SONAR_HOST_URL }}" ]; then
@@ -49,7 +49,7 @@ jobs:
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
-          SONAR_TOKEN: ${{ secrets.SONARTOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           args: >
@@ -62,5 +62,5 @@ jobs:
         uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
         timeout-minutes: 5
         env:
-          SONAR_TOKEN: ${{ secrets.SONARTOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
