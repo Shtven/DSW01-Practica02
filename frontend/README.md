@@ -79,6 +79,34 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
+## Cypress login integration test (frontend + backend)
+
+This repository includes a simple Cypress integration test that validates the login flow against the real backend.
+
+1. Start backend on `http://localhost:8080`.
+2. Start frontend on `http://localhost:4200`.
+3. Install dependencies (first time only):
+
+```bash
+npm install
+```
+
+4. Run the login integration test:
+
+```bash
+npm run e2e:login
+```
+
+You can override runtime values with environment variables:
+
+```bash
+CYPRESS_BASE_URL=http://localhost:4200 \
+CYPRESS_API_URL=http://localhost:8080 \
+CYPRESS_USERNAME=admin@example.com \
+CYPRESS_PASSWORD=admin123 \
+npm run e2e:login
+```
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
