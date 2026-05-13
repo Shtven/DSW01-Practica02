@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # =========================
+      # Checkout
+      # =========================
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -52,12 +55,20 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Install Vitest coverage dependency
+        working-directory: frontend
+        run: npm install -D @vitest/coverage-v8
+
+      - name: Install Vitest browser dependency
+        working-directory: frontend
+        run: npm install -D @vitest/browser playwright
+
       - name: Run frontend tests with coverage
         working-directory: frontend
-        run: npm test -- --watch=false --browsers=ChromeHeadless --coverage
+        run: npm test -- --coverage
 
       # =========================
-      # Sonar validation
+      # Validate Sonar secrets
       # =========================
       - name: Validate Sonar secrets
         run: |
@@ -87,7 +98,7 @@ jobs:
             -Dsonar.sources=src,frontend/src
             -Dsonar.tests=frontend/src
             -Dsonar.java.binaries=target/classes
-            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/frontend/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
 
       # =========================
       # Quality Gate
