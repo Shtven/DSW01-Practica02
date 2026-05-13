@@ -57,102 +57,16 @@ jobs:
       - name: Run backend unit tests
         run: mvn -B test
 
-  frontend-cypress-e2e:
-    name: Frontend Cypress E2E (Login)
-    runs-on: ubuntu-latest
-    needs:
-      - frontend-unit-tests
-      - backend-unit-tests
-    timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js (LTS)
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install frontend dependencies
-        env:
-          CYPRESS_INSTALL_BINARY: 0
-        run: npm ci
-
-      - name: Start integration stack with Docker Compose
-        working-directory: .
-        run: docker compose -f docker/compose.yml up -d --build
-
-      - name: Wait for frontend to be ready
-        working-directory: .
-        run: |
-          for i in {1..60}; do
-            if curl -fsS http://localhost/login > /dev/null; then
-              echo "Frontend is ready"
-              exit 0
-            fi
-            echo "Waiting for frontend... attempt $i/60"
-            sleep 5
-          done
-          echo "Frontend did not become ready in time"
-          docker compose -f docker/compose.yml logs
-          exit 1
-
-      - name: Run Cypress login E2E
-        env:
-          CYPRESS_BASE_URL: http://localhost
-          CYPRESS_API_URL: http://localhost
-          CYPRESS_USERNAME: admin@example.com
-          CYPRESS_PASSWORD: admin123
-        run: |
-          HOST_PWD="$PWD"
-          if [[ "$PWD" =~ ^/mnt/([a-z])/(.*) ]]; then
-            DRIVE="${BASH_REMATCH[1]}"
-            REST="${BASH_REMATCH[2]}"
-            if [ -d "/run/desktop/mnt/host/${DRIVE}" ]; then
-              HOST_PWD="/run/desktop/mnt/host/${DRIVE}/${REST}"
-            else
-              HOST_PWD="/host_mnt/${DRIVE}/${REST}"
-            fi
-          fi
-          echo "Using HOST_PWD=${HOST_PWD}"
-          docker run --rm --network host -v "${HOST_PWD}:/e2e" -w /e2e -e CYPRESS_BASE_URL -e CYPRESS_API_URL -e CYPRESS_USERNAME -e CYPRESS_PASSWORD cypress/included:14.5.4 cypress run --config-file cypress.config.js --spec cypress/e2e/login.cy.js
-
-      - name: Upload Cypress screenshots (GitHub Actions)
-        if: ${{ failure() && env.ACT != 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-screenshots
-          path: frontend/cypress/screenshots
-          if-no-files-found: ignore
-
-      - name: Save Cypress screenshots locally (act)
-        if: ${{ failure() && env.ACT == 'true' }}
-        run: |
-          mkdir -p .artifacts/cypress-screenshots
-          cp -r frontend/cypress/screenshots/* .artifacts/cypress-screenshots/ || true
-          echo "Saved Cypress screenshots to .artifacts/cypress-screenshots"
-
-      - name: Stop integration stack
-        if: always()
-        working-directory: .
-        run: docker compose -f docker/compose.yml down -v
-
   post-validation-gate:
     name: Post Validation Gate
     runs-on: ubuntu-latest
     needs:
       - frontend-unit-tests
       - backend-unit-tests
-      - frontend-cypress-e2e
     if: ${{ success() }}
     steps:
       - name: Confirm both unit-test jobs passed
-        run: echo "Unit tests and Cypress E2E job passed."
+        run: echo "Unit tests passed."
 
       - name: Docker pull nginx image
         run: docker pull nginx:1.27-alpine

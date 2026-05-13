@@ -20,7 +20,7 @@ export class AuthFacade {
     this.sessionAuth.login(username.trim(), password);
 
     return this.apiClient
-      .get<EmpleadoProbePage>('/api/v1/empleados', { page: 0, size: 1 })
+      .get<EmpleadoProbePage>('/v1/empleados', { page: 0, size: 1 })
       .pipe(
         map(() => true),
         catchError(() => {
