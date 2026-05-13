@@ -1,4 +1,4 @@
-name: SonarQube Analysis
+name: 02-SonarQube
 
 on:
   workflow_run:
