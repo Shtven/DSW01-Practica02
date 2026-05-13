@@ -145,6 +145,30 @@ jobs:
           echo "====================================="
 
       # =========================
+      # Debug CE Task
+      # =========================
+      - name: Debug CE Task
+        run: |
+          CE_TASK_URL=$(grep ceTaskUrl .scannerwork/report-task.txt | sed 's/^ceTaskUrl=//')
+
+          echo "CE_TASK_URL=$CE_TASK_URL"
+
+          curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
+          "$CE_TASK_URL"
+
+      # =========================
+      # Debug Quality Gate API
+      # =========================
+      - name: Debug Quality Gate API
+        run: |
+          DASHBOARD_URL=$(grep dashboardUrl .scannerwork/report-task.txt | sed 's/^dashboardUrl=//')
+
+          echo "DASHBOARD_URL=$DASHBOARD_URL"
+
+          curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
+          "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}"
+
+      # =========================
       # Wait for Sonar analysis
       # =========================
       - name: Wait for Sonar processing
@@ -154,26 +178,26 @@ jobs:
       # Manual Quality Gate Check
       # =========================
       - name: Check Quality Gate manually
-      run: |
-        RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
-        "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}")
+        run: |
+          PROJECT_KEY="${{ secrets.SONAR_PROJECT_KEY }}"
+          SONAR_HOST="${{ secrets.SONAR_HOST_URL }}"
 
-        echo "Quality Gate response:"
-        echo "$RESPONSE"
+          echo "Checking Quality Gate for project: $PROJECT_KEY"
 
-        STATUS=$(echo "$RESPONSE" | jq -r '.projectStatus.status')
+          RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
+          "$SONAR_HOST/api/qualitygates/project_status?projectKey=$PROJECT_KEY")
 
-    echo "Quality Gate Status: $STATUS"
+          echo "Quality Gate response:"
+          echo "$RESPONSE"
 
-      if [ "$STATUS" = "NONE" ]; then
-      echo "No Quality Gate configured yet"
-      exit 0
-      
-     fi
+          STATUS=$(echo "$RESPONSE" | jq -r '.projectStatus.status')
 
-     if [ "$STATUS" != "OK" ]; then
-      echo "Quality Gate FAILED"
-      exit 1
-     fi
+          echo "Quality Gate Status: $STATUS"
 
-     echo "Quality Gate PASSED"
+          if [ "$STATUS" = "OK" ] || [ "$STATUS" = "NONE" ]; then
+            echo "Quality Gate PASSED"
+            exit 0
+          else
+            echo "Quality Gate FAILED"
+            exit 1
+          fi
