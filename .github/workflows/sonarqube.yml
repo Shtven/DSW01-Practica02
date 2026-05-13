@@ -54,7 +54,7 @@ jobs:
 
       - name: Run frontend tests with coverage
         working-directory: frontend
-        run: npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
+        run: npm test -- --watch=false --browsers=ChromeHeadless --coverage
 
       # =========================
       # Sonar validation
