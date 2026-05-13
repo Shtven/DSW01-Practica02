@@ -57,7 +57,7 @@ jobs:
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.projectName=${{ secrets.SONAR_PROJECT_NAME }}
             -Dsonar.sources=src,frontend/src
-            -Dsonar.tests=src/test,frontend/src
+            -Dsonar.tests=frontend/cypress
 
       - name: SonarQube Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
