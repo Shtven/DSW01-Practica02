@@ -5,10 +5,12 @@ on:
     branches:
       - master
       - develop
+
   pull_request:
     branches:
       - master
       - develop
+
   workflow_dispatch:
 
 permissions:
@@ -55,6 +57,7 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      # Dependencias necesarias para Angular + Vitest
       - name: Install Vitest coverage dependency
         working-directory: frontend
         run: npm install -D @vitest/coverage-v8
@@ -63,6 +66,7 @@ jobs:
         working-directory: frontend
         run: npm install -D @vitest/browser playwright
 
+      # Ejecutar tests con coverage
       - name: Run frontend tests with coverage
         working-directory: frontend
         run: npm test -- --coverage
@@ -96,7 +100,7 @@ jobs:
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.projectName=${{ secrets.SONAR_PROJECT_NAME }}
             -Dsonar.sources=src,frontend/src
-            -Dsonar.tests=frontend/src
+            -Dsonar.tests=frontend/cypress
             -Dsonar.java.binaries=target/classes
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
 
