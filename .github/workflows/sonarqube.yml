@@ -85,26 +85,60 @@ jobs:
             echo "Missing required secret: SONAR_HOST_URL"
             exit 1
           fi
+
+          if [ -z "${{ secrets.SONAR_ORGANIZATION }}" ]; then
+            echo "Missing required secret: SONAR_ORGANIZATION"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.SONAR_PROJECT_KEY }}" ]; then
+            echo "Missing required secret: SONAR_PROJECT_KEY"
+            exit 1
+          fi
+
       # =========================
-      # Debug Sonar configuration
+      # DEBUG SONAR VARIABLES
       # =========================
       - name: Debug Sonar variables
         run: |
-          echo "SONAR_HOST_URL=${{ secrets.SONAR_HOST_URL }}"
-          echo "SONAR_ORGANIZATION=${{ secrets.SONAR_ORGANIZATION }}"
-          echo "SONAR_PROJECT_KEY=${{ secrets.SONAR_PROJECT_KEY }}"
-          echo "SONAR_PROJECT_NAME=${{ secrets.SONAR_PROJECT_NAME }}"
+          echo "=============================="
+          echo "SONAR_HOST_URL:"
+          echo "${{ secrets.SONAR_HOST_URL }}"
+          echo ""
+          echo "SONAR_ORGANIZATION:"
+          echo "${{ secrets.SONAR_ORGANIZATION }}"
+          echo ""
+          echo "SONAR_PROJECT_KEY:"
+          echo "${{ secrets.SONAR_PROJECT_KEY }}"
+          echo ""
+          echo "SONAR_PROJECT_NAME:"
+          echo "${{ secrets.SONAR_PROJECT_NAME }}"
+          echo "=============================="
 
+      # =========================
+      # Validate token manually
+      # =========================
       - name: Validate Sonar token against API
         run: |
           curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
           "${{ secrets.SONAR_HOST_URL }}/api/authentication/validate"
 
-      - name: Debug effective sonar values
+      # =========================
+      # Test Quality Gate API manually
+      # =========================
+      - name: Manual Quality Gate API test
         run: |
-          echo "ORG=${{ secrets.SONAR_ORGANIZATION }}"
-          echo "KEY=${{ secrets.SONAR_PROJECT_KEY }}"
-          echo "HOST=${{ secrets.SONAR_HOST_URL }}"
+          curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
+          "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}"
+
+      # =========================
+      # Verify coverage exists
+      # =========================
+      - name: Verify coverage files
+        run: |
+          echo "========== COVERAGE FILES =========="
+          ls -R frontend/coverage || true
+          echo "===================================="
 
       # =========================
       # SonarQube Scan
@@ -121,18 +155,38 @@ jobs:
             -Dsonar.projectName=${{ secrets.SONAR_PROJECT_NAME }}
             -Dsonar.sources=src,frontend/src
             -Dsonar.tests=frontend/cypress
+            -Dsonar.exclusions=frontend/src/**/*.spec.ts
             -Dsonar.java.binaries=target/classes
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
 
-      - name: Debug Sonar URL
-        run: |
-          echo "${{ secrets.SONAR_HOST_URL }}"
-          
+      # =========================
+      # Debug generated report
+      # =========================
       - name: Debug Sonar report
         run: |
           echo "========== report-task.txt =========="
           cat .scannerwork/report-task.txt
           echo "====================================="
+
+      # =========================
+      # Extract CE task URL
+      # =========================
+      - name: Debug CE task
+        run: |
+          CE_TASK_URL=$(grep ceTaskUrl .scannerwork/report-task.txt | cut -d= -f2)
+
+          echo "CE_TASK_URL=$CE_TASK_URL"
+
+          curl -v -u "${{ secrets.SONAR_TOKEN }}:" "$CE_TASK_URL"
+
+      # =========================
+      # Debug dashboard URL
+      # =========================
+      - name: Debug dashboard URL
+        run: |
+          DASHBOARD_URL=$(grep dashboardUrl .scannerwork/report-task.txt | cut -d= -f2)
+
+          echo "DASHBOARD_URL=$DASHBOARD_URL"
 
       # =========================
       # Quality Gate
@@ -143,3 +197,15 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      # =========================
+      # Final debug if Quality Gate fails
+      # =========================
+      - name: Final Sonar debug
+        if: always()
+        run: |
+          echo "========== FINAL DEBUG =========="
+          echo "HOST: ${{ secrets.SONAR_HOST_URL }}"
+          echo "ORG: ${{ secrets.SONAR_ORGANIZATION }}"
+          echo "KEY: ${{ secrets.SONAR_PROJECT_KEY }}"
+          echo "================================="
