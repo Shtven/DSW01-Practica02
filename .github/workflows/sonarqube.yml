@@ -100,6 +100,12 @@ jobs:
           curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
           "${{ secrets.SONAR_HOST_URL }}/api/authentication/validate"
 
+      - name: Debug effective sonar values
+        run: |
+          echo "ORG=${{ secrets.SONAR_ORGANIZATION }}"
+          echo "KEY=${{ secrets.SONAR_PROJECT_KEY }}"
+          echo "HOST=${{ secrets.SONAR_HOST_URL }}"
+
       # =========================
       # SonarQube Scan
       # =========================
@@ -117,6 +123,13 @@ jobs:
             -Dsonar.tests=frontend/cypress
             -Dsonar.java.binaries=target/classes
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+
+
+      - name: Debug Sonar report
+        run: |
+          echo "========== report-task.txt =========="
+          cat .scannerwork/report-task.txt
+          echo "====================================="
 
       # =========================
       # Quality Gate
