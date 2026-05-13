@@ -1,10 +1,12 @@
 name: Docker Build and Push
 
 on:
-  push:
-    branches:
-      - master
-      - develop
+  workflow_run:
+    workflows:
+      - 03-Cypress-E2E
+    types:
+      - completed
+
   workflow_dispatch:
 
 permissions:
@@ -12,6 +14,7 @@ permissions:
 
 jobs:
   docker-push:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Build and Push Images
     runs-on: ubuntu-latest
     steps:

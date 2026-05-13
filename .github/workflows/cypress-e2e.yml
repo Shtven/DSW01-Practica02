@@ -1,14 +1,11 @@
-name: Cypress E2E (Login)
+name: 03-Cypress-E2E
 
 on:
-  push:
-    branches:
-      - master
-      - develop
-  pull_request:
-    branches:
-      - master
-      - develop
+  workflow_run:
+    workflows:
+      - 02-SonarQube
+    types:
+      - completed
 
 permissions:
   contents: read
@@ -19,6 +16,7 @@ concurrency:
 
 jobs:
   frontend-cypress-e2e:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Frontend Cypress E2E (Login)
     runs-on: ubuntu-latest
     timeout-minutes: 30

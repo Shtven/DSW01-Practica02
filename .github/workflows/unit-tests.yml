@@ -1,4 +1,4 @@
-name: Unit Tests (Frontend and Backend)
+name: 01-Unit-Test
 
 on:
   push:
