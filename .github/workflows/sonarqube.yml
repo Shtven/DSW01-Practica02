@@ -57,7 +57,6 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      # Dependencias Vitest
       - name: Install Vitest coverage dependency
         working-directory: frontend
         run: npm install -D @vitest/coverage-v8
@@ -66,7 +65,6 @@ jobs:
         working-directory: frontend
         run: npm install -D @vitest/browser playwright
 
-      # Tests frontend con coverage
       - name: Run frontend tests with coverage
         working-directory: frontend
         run: npm test -- --coverage
@@ -86,31 +84,18 @@ jobs:
             exit 1
           fi
 
-          if [ -z "${{ secrets.SONAR_ORGANIZATION }}" ]; then
-            echo "Missing SONAR_ORGANIZATION"
-            exit 1
-          fi
-
-          if [ -z "${{ secrets.SONAR_PROJECT_KEY }}" ]; then
-            echo "Missing SONAR_PROJECT_KEY"
-            exit 1
-          fi
-
       # =========================
-      # DEBUG VARIABLES
+      # Debug variables
       # =========================
       - name: Debug Sonar variables
         run: |
           echo "=============================="
           echo "HOST:"
           echo "${{ secrets.SONAR_HOST_URL }}"
-          echo ""
           echo "ORG:"
           echo "${{ secrets.SONAR_ORGANIZATION }}"
-          echo ""
           echo "KEY:"
           echo "${{ secrets.SONAR_PROJECT_KEY }}"
-          echo ""
           echo "NAME:"
           echo "${{ secrets.SONAR_PROJECT_NAME }}"
           echo "=============================="
@@ -124,16 +109,7 @@ jobs:
           "${{ secrets.SONAR_HOST_URL }}/api/authentication/validate"
 
       # =========================
-      # Verify coverage exists
-      # =========================
-      - name: Verify coverage files
-        run: |
-          echo "========== COVERAGE =========="
-          ls -R frontend/coverage || true
-          echo "=============================="
-
-      # =========================
-      # SonarQube Scan
+      # Sonar Scan
       # =========================
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
@@ -147,65 +123,51 @@ jobs:
             -Dsonar.projectName=${{ secrets.SONAR_PROJECT_NAME }}
             -Dsonar.sources=src,frontend/src
             -Dsonar.tests=frontend/cypress
-            -Dsonar.exclusions=frontend/src/**/*.spec.ts
             -Dsonar.java.binaries=target/classes
-            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/frontend/lcov.info
 
       # =========================
-      # Debug report-task.txt
+      # Debug coverage
       # =========================
-      - name: Debug Sonar report
+      - name: Debug coverage
+        run: |
+          echo "========== COVERAGE =========="
+          ls -R frontend/coverage || true
+          echo "=============================="
+
+      # =========================
+      # Debug report-task
+      # =========================
+      - name: Debug report-task
         run: |
           echo "========== report-task.txt =========="
           cat .scannerwork/report-task.txt
           echo "====================================="
 
       # =========================
-      # Debug CE Task URL
+      # Wait for Sonar analysis
       # =========================
-      - name: Debug CE task
+      - name: Wait for Sonar processing
+        run: sleep 15
+
+      # =========================
+      # Manual Quality Gate Check
+      # =========================
+      - name: Check Quality Gate manually
         run: |
-          CE_TASK_URL=$(grep ceTaskUrl .scannerwork/report-task.txt | sed 's/^ceTaskUrl=//')
+          RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
+          "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}")
 
-          echo "CE_TASK_URL=$CE_TASK_URL"
+          echo "Quality Gate response:"
+          echo "$RESPONSE"
 
-          curl -v -u "${{ secrets.SONAR_TOKEN }}:" "$CE_TASK_URL"
+          STATUS=$(echo "$RESPONSE" | jq -r '.projectStatus.status')
 
-      # =========================
-      # Debug Dashboard URL
-      # =========================
-      - name: Debug dashboard URL
-        run: |
-          DASHBOARD_URL=$(grep dashboardUrl .scannerwork/report-task.txt | sed 's/^dashboardUrl=//')
+          echo "Quality Gate Status: $STATUS"
 
-          echo "DASHBOARD_URL=$DASHBOARD_URL"
+          if [ "$STATUS" != "OK" ]; then
+            echo "Quality Gate FAILED"
+            exit 1
+          fi
 
-      # =========================
-      # Manual Quality Gate API
-      # =========================
-      - name: Manual Quality Gate API test
-        run: |
-          curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
-          "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}"
-
-      # =========================
-      # Quality Gate
-      # =========================
-      - name: SonarQube Quality Gate
-        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-      # =========================
-      # Final Debug
-      # =========================
-      - name: Final Sonar debug
-        if: always()
-        run: |
-          echo "========== FINAL DEBUG =========="
-          echo "HOST=${{ secrets.SONAR_HOST_URL }}"
-          echo "ORG=${{ secrets.SONAR_ORGANIZATION }}"
-          echo "KEY=${{ secrets.SONAR_PROJECT_KEY }}"
-          echo "================================="
+          echo "Quality Gate PASSED"
