@@ -57,7 +57,7 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      # Dependencias necesarias para Angular + Vitest
+      # Dependencias Vitest
       - name: Install Vitest coverage dependency
         working-directory: frontend
         run: npm install -D @vitest/coverage-v8
@@ -66,7 +66,7 @@ jobs:
         working-directory: frontend
         run: npm install -D @vitest/browser playwright
 
-      # Ejecutar tests con coverage
+      # Tests frontend con coverage
       - name: Run frontend tests with coverage
         working-directory: frontend
         run: npm test -- --coverage
@@ -77,68 +77,60 @@ jobs:
       - name: Validate Sonar secrets
         run: |
           if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
-            echo "Missing required secret: SONAR_TOKEN"
+            echo "Missing SONAR_TOKEN"
             exit 1
           fi
 
           if [ -z "${{ secrets.SONAR_HOST_URL }}" ]; then
-            echo "Missing required secret: SONAR_HOST_URL"
+            echo "Missing SONAR_HOST_URL"
             exit 1
           fi
 
           if [ -z "${{ secrets.SONAR_ORGANIZATION }}" ]; then
-            echo "Missing required secret: SONAR_ORGANIZATION"
+            echo "Missing SONAR_ORGANIZATION"
             exit 1
           fi
 
           if [ -z "${{ secrets.SONAR_PROJECT_KEY }}" ]; then
-            echo "Missing required secret: SONAR_PROJECT_KEY"
+            echo "Missing SONAR_PROJECT_KEY"
             exit 1
           fi
 
       # =========================
-      # DEBUG SONAR VARIABLES
+      # DEBUG VARIABLES
       # =========================
       - name: Debug Sonar variables
         run: |
           echo "=============================="
-          echo "SONAR_HOST_URL:"
+          echo "HOST:"
           echo "${{ secrets.SONAR_HOST_URL }}"
           echo ""
-          echo "SONAR_ORGANIZATION:"
+          echo "ORG:"
           echo "${{ secrets.SONAR_ORGANIZATION }}"
           echo ""
-          echo "SONAR_PROJECT_KEY:"
+          echo "KEY:"
           echo "${{ secrets.SONAR_PROJECT_KEY }}"
           echo ""
-          echo "SONAR_PROJECT_NAME:"
+          echo "NAME:"
           echo "${{ secrets.SONAR_PROJECT_NAME }}"
           echo "=============================="
 
       # =========================
-      # Validate token manually
+      # Validate token
       # =========================
-      - name: Validate Sonar token against API
+      - name: Validate Sonar token
         run: |
           curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
           "${{ secrets.SONAR_HOST_URL }}/api/authentication/validate"
-
-      # =========================
-      # Test Quality Gate API manually
-      # =========================
-      - name: Manual Quality Gate API test
-        run: |
-          curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
-          "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}"
 
       # =========================
       # Verify coverage exists
       # =========================
       - name: Verify coverage files
         run: |
-          echo "========== COVERAGE FILES =========="
+          echo "========== COVERAGE =========="
           ls -R frontend/coverage || true
-          echo "===================================="
+          echo "=============================="
 
       # =========================
       # SonarQube Scan
@@ -160,7 +152,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
 
       # =========================
-      # Debug generated report
+      # Debug report-task.txt
       # =========================
       - name: Debug Sonar report
         run: |
@@ -169,24 +161,32 @@ jobs:
           echo "====================================="
 
       # =========================
-      # Extract CE task URL
+      # Debug CE Task URL
       # =========================
       - name: Debug CE task
         run: |
-          CE_TASK_URL=$(grep ceTaskUrl .scannerwork/report-task.txt | cut -d= -f2)
+          CE_TASK_URL=$(grep ceTaskUrl .scannerwork/report-task.txt | sed 's/^ceTaskUrl=//')
 
           echo "CE_TASK_URL=$CE_TASK_URL"
 
           curl -v -u "${{ secrets.SONAR_TOKEN }}:" "$CE_TASK_URL"
 
       # =========================
-      # Debug dashboard URL
+      # Debug Dashboard URL
       # =========================
       - name: Debug dashboard URL
         run: |
-          DASHBOARD_URL=$(grep dashboardUrl .scannerwork/report-task.txt | cut -d= -f2)
+          DASHBOARD_URL=$(grep dashboardUrl .scannerwork/report-task.txt | sed 's/^dashboardUrl=//')
 
           echo "DASHBOARD_URL=$DASHBOARD_URL"
+
+      # =========================
+      # Manual Quality Gate API
+      # =========================
+      - name: Manual Quality Gate API test
+        run: |
+          curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
+          "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}"
 
       # =========================
       # Quality Gate
@@ -199,13 +199,13 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       # =========================
-      # Final debug if Quality Gate fails
+      # Final Debug
       # =========================
       - name: Final Sonar debug
         if: always()
         run: |
           echo "========== FINAL DEBUG =========="
-          echo "HOST: ${{ secrets.SONAR_HOST_URL }}"
-          echo "ORG: ${{ secrets.SONAR_ORGANIZATION }}"
-          echo "KEY: ${{ secrets.SONAR_PROJECT_KEY }}"
+          echo "HOST=${{ secrets.SONAR_HOST_URL }}"
+          echo "ORG=${{ secrets.SONAR_ORGANIZATION }}"
+          echo "KEY=${{ secrets.SONAR_PROJECT_KEY }}"
           echo "================================="
