@@ -1,0 +1,71 @@
+contract: github-workflow-tests
+version: 1.0.0
+feature: 001-github-workflow-tests
+summary: >-
+  CI workflow contract for automated frontend and backend unit tests on push and
+  pull request events for master and develop branches.
+
+workflow:
+  filePath: .github/workflows/unit-tests.yml
+  permissions:
+    contents: read
+  failFast: true
+  concurrency:
+    cancelInProgress: true
+
+triggers:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  frontend-unit-tests:
+    required: true
+    layer: frontend
+    runtime:
+      node: lts
+    commandType: direct
+    command: npm test
+    expectedOutcome: unit-tests-executed
+
+  backend-unit-tests:
+    required: true
+    layer: backend
+    runtime:
+      java: '17'
+    commandType: direct
+    command: mvn -B test
+    expectedOutcome: unit-tests-executed
+
+  post-validation-gate:
+    required: true
+    layer: quality-gate
+    dependsOn:
+      - frontend-unit-tests
+      - backend-unit-tests
+    expectedOutcome: runs-only-when-tests-pass
+
+runBehavior:
+  onAnyJobFailure:
+    workflowResult: failed
+    dependentValidationsBlocked: true
+    inProgressRunsMayBeCancelled: true
+
+acceptanceMapping:
+  - id: FR-009
+    assertion: push trigger includes master and develop
+  - id: FR-010
+    assertion: pull_request trigger includes master and develop
+  - id: FR-011
+    assertion: exactly two unit test jobs are defined
+  - id: FR-016
+    assertion: frontend uses Node LTS and backend uses Java 17
+  - id: FR-018
+    assertion: fail-fast behavior is enabled
+  - id: FR-019
+    assertion: global permissions set to contents read-only

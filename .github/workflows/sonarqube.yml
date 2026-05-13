@@ -1,0 +1,200 @@
+name: 02-SonarQube
+
+on:
+  workflow_run:
+    workflows:
+      - 01-Unit-Test
+    types:
+      - completed
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sonarqube:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: SonarQube Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      # =========================
+      # Checkout
+      # =========================
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # =========================
+      # Backend
+      # =========================
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build backend classes
+        run: mvn -B -DskipTests compile
+
+      # =========================
+      # Frontend
+      # =========================
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Vitest coverage dependency
+        working-directory: frontend
+        run: npm install -D @vitest/coverage-v8
+
+      - name: Install Vitest browser dependency
+        working-directory: frontend
+        run: npm install -D @vitest/browser playwright
+
+      - name: Run frontend tests with coverage
+        working-directory: frontend
+        run: npm test -- --coverage
+
+      # =========================
+      # Validate Sonar secrets
+      # =========================
+      - name: Validate Sonar secrets
+        run: |
+          if [ -z "${{ secrets.SONAR_TOKEN }}" ]; then
+            echo "Missing SONAR_TOKEN"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.SONAR_HOST_URL }}" ]; then
+            echo "Missing SONAR_HOST_URL"
+            exit 1
+          fi
+
+      # =========================
+      # Debug variables
+      # =========================
+      - name: Debug Sonar variables
+        run: |
+          echo "=============================="
+          echo "HOST:"
+          echo "${{ secrets.SONAR_HOST_URL }}"
+          echo "ORG:"
+          echo "${{ secrets.SONAR_ORGANIZATION }}"
+          echo "KEY:"
+          echo "${{ secrets.SONAR_PROJECT_KEY }}"
+          echo "NAME:"
+          echo "${{ secrets.SONAR_PROJECT_NAME }}"
+          echo "=============================="
+
+      # =========================
+      # Validate token
+      # =========================
+      - name: Validate Sonar token
+        run: |
+          curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
+          "${{ secrets.SONAR_HOST_URL }}/api/authentication/validate"
+
+      # =========================
+      # Sonar Scan
+      # =========================
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.projectName=${{ secrets.SONAR_PROJECT_NAME }}
+            -Dsonar.sources=src,frontend/src
+            -Dsonar.tests=frontend/cypress
+            -Dsonar.java.binaries=target/classes
+            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/frontend/lcov.info
+
+      # =========================
+      # Debug coverage
+      # =========================
+      - name: Debug coverage
+        run: |
+          echo "========== COVERAGE =========="
+          ls -R frontend/coverage || true
+          echo "=============================="
+
+      # =========================
+      # Debug report-task
+      # =========================
+      - name: Debug report-task
+        run: |
+          echo "========== report-task.txt =========="
+          cat .scannerwork/report-task.txt
+          echo "====================================="
+
+      # =========================
+      # Debug CE Task
+      # =========================
+      - name: Debug CE Task
+        run: |
+          CE_TASK_URL=$(grep ceTaskUrl .scannerwork/report-task.txt | sed 's/^ceTaskUrl=//')
+
+          echo "CE_TASK_URL=$CE_TASK_URL"
+
+          curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
+          "$CE_TASK_URL"
+
+      # =========================
+      # Debug Quality Gate API
+      # =========================
+      - name: Debug Quality Gate API
+        run: |
+          DASHBOARD_URL=$(grep dashboardUrl .scannerwork/report-task.txt | sed 's/^dashboardUrl=//')
+
+          echo "DASHBOARD_URL=$DASHBOARD_URL"
+
+          curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
+          "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}"
+
+      # =========================
+      # Wait for Sonar analysis
+      # =========================
+      - name: Wait for Sonar processing
+        run: sleep 15
+
+      # =========================
+      # Manual Quality Gate Check
+      # =========================
+      - name: Check Quality Gate manually
+        run: |
+          PROJECT_KEY="${{ secrets.SONAR_PROJECT_KEY }}"
+          SONAR_HOST="${{ secrets.SONAR_HOST_URL }}"
+
+          echo "Checking Quality Gate for project: $PROJECT_KEY"
+
+          RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
+          "$SONAR_HOST/api/qualitygates/project_status?projectKey=$PROJECT_KEY")
+
+          echo "Quality Gate response:"
+          echo "$RESPONSE"
+
+          STATUS=$(echo "$RESPONSE" | jq -r '.projectStatus.status')
+
+          echo "Quality Gate Status: $STATUS"
+
+          if [ "$STATUS" = "OK" ] || [ "$STATUS" = "NONE" ]; then
+            echo "Quality Gate PASSED"
+            exit 0
+          else
+            echo "Quality Gate FAILED"
+            exit 1
+          fi
