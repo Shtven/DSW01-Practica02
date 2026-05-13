@@ -58,6 +58,7 @@ jobs:
             -Dsonar.projectName=${{ secrets.SONAR_PROJECT_NAME }}
             -Dsonar.sources=src,frontend/src
             -Dsonar.tests=frontend/cypress
+            -Dsonar.java.binaries=target/classes
 
       - name: SonarQube Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
