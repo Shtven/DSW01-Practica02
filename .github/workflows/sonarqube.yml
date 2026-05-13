@@ -124,7 +124,10 @@ jobs:
             -Dsonar.java.binaries=target/classes
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
 
-
+      - name: Debug Sonar URL
+        run: |
+          echo "${{ secrets.SONAR_HOST_URL }}"
+          
       - name: Debug Sonar report
         run: |
           echo "========== report-task.txt =========="
