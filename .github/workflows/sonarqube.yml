@@ -85,6 +85,20 @@ jobs:
             echo "Missing required secret: SONAR_HOST_URL"
             exit 1
           fi
+      # =========================
+      # Debug Sonar configuration
+      # =========================
+      - name: Debug Sonar variables
+        run: |
+          echo "SONAR_HOST_URL=${{ secrets.SONAR_HOST_URL }}"
+          echo "SONAR_ORGANIZATION=${{ secrets.SONAR_ORGANIZATION }}"
+          echo "SONAR_PROJECT_KEY=${{ secrets.SONAR_PROJECT_KEY }}"
+          echo "SONAR_PROJECT_NAME=${{ secrets.SONAR_PROJECT_NAME }}"
+
+      - name: Validate Sonar token against API
+        run: |
+          curl -v -u "${{ secrets.SONAR_TOKEN }}:" \
+          "${{ secrets.SONAR_HOST_URL }}/api/authentication/validate"
 
       # =========================
       # SonarQube Scan
