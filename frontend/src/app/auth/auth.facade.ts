@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, map, Observable, of, tap } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { ApiClientService } from '../core/http/api-client.service';
 import { SessionAuthService } from './session-auth.service';
 
@@ -36,11 +36,11 @@ export class AuthFacade {
   }
 
   completeLoginNavigation(returnUrl?: string | null): void {
-    if (returnUrl && returnUrl.startsWith('/')) {
-      void this.router.navigateByUrl(returnUrl);
+    if (returnUrl?.startsWith('/')) {
+      this.router.navigateByUrl(returnUrl);
       return;
     }
 
-    void this.router.navigate(['/empleados']);
+    this.router.navigate(['/empleados']);
   }
 }
