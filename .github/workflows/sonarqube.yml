@@ -154,20 +154,26 @@ jobs:
       # Manual Quality Gate Check
       # =========================
       - name: Check Quality Gate manually
-        run: |
-          RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
-          "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}")
+      run: |
+        RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
+        "${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ secrets.SONAR_PROJECT_KEY }}")
 
-          echo "Quality Gate response:"
-          echo "$RESPONSE"
+        echo "Quality Gate response:"
+        echo "$RESPONSE"
 
-          STATUS=$(echo "$RESPONSE" | jq -r '.projectStatus.status')
+        STATUS=$(echo "$RESPONSE" | jq -r '.projectStatus.status')
 
-          echo "Quality Gate Status: $STATUS"
+    echo "Quality Gate Status: $STATUS"
 
-          if [ "$STATUS" != "OK" ]; then
-            echo "Quality Gate FAILED"
-            exit 1
-          fi
+      if [ "$STATUS" = "NONE" ]; then
+      echo "No Quality Gate configured yet"
+      exit 0
+      
+     fi
 
-          echo "Quality Gate PASSED"
+     if [ "$STATUS" != "OK" ]; then
+      echo "Quality Gate FAILED"
+      exit 1
+     fi
+
+     echo "Quality Gate PASSED"
